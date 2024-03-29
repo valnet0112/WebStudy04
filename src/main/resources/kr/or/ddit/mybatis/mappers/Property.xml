@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.property.dao.PropertyDAO">
+	<insert id="insertProperty" parameterType="PropertyVO">
+		INSERT INTO TB_PROPERTIES    
+		(
+			PROPERTY_NAME
+			, PROPERTY_VALUE
+			, DESCRIPTION
+		)VALUES    
+		(
+			#{propertyName,jdbcType=VARCHAR}
+			, #{propertyValue,jdbcType=VARCHAR}
+			, #{description,jdbcType=VARCHAR}
+		)       
+	</insert>
+	<select id="selectProperties" resultType="PropertyVO">
+		SELECT PROPERTY_NAME, PROPERTY_VALUE, DESCRIPTION, PROP_DATE, PROP_TIMESTAMP 
+		FROM TB_PROPERTIES
+	</select>
+	<select id="selectProperty" resultType="PropertyVO" parameterType="string">
+		SELECT PROPERTY_NAME, PROPERTY_VALUE, DESCRIPTION, PROP_DATE, PROP_TIMESTAMP 
+		FROM TB_PROPERTIES 
+		WHERE PROPERTY_NAME = #{name} 
+	</select>
+	<update id="updateProperty" parameterType="PropertyVO">
+		UPDATE TB_PROPERTIES    
+		SET                     
+			PROPERTY_VALUE = #{propertyValue,jdbcType=VARCHAR}   
+			, DESCRIPTION = #{description,jdbcType=VARCHAR}        
+		WHERE PROPERTY_NAME= #{propertyName,jdbcType=VARCHAR}  
+	</update>
+	<delete id="deleteProperty" parameterType="string">
+		DELETE FROM TB_PROPERTIES 
+		WHERE PROPERTY_NAME = #{propertyName}
+	</delete>
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.buyer.dao.BuyerDAO">
+	<resultMap type="BuyerVO" id="buyerMap" autoMapping="true">
+		<id property="buyerId" column="BUYER_ID"/>
+		<association property="lprod" javaType="hashmap">
+			<result property="lprodGu" column="LPROD_GU"/>
+			<result property="lprodNm" column="LPROD_NM"/>
+		</association>
+		<collection property="prodList" javaType="list" ofType="ProdVO" autoMapping="true">
+			<id property="prodId" column="PROD_ID"/>
+		</collection>
+	</resultMap>
+	<select id="selectBuyer" resultMap="buyerMap">
+		SELECT
+			BUYER_ID, BUYER_NAME, BUYER_LGU
+			, BUYER_BANK, BUYER_BANKNO, BUYER_BANKNAME
+			, BUYER_ZIP, BUYER_ADD1, BUYER_ADD2
+			, BUYER_COMTEL, BUYER_FAX, BUYER_MAIL
+			, BUYER_CHARGER, BUYER_TELEXT
+			, LPROD_GU, LPROD_NM
+			, PROD_ID, PROD_NAME, PROD_COST
+			, PROD_PRICE, PROD_SALE, PROD_MILEAGE
+		FROM BUYER INNER JOIN LPROD ON (BUYER_LGU = LPROD_GU)
+				LEFT OUTER JOIN PROD ON (BUYER_ID = PROD_BUYER)
+		WHERE BUYER_ID = #{buyerId}
+	</select>
+	<sql id="searchFrag">
+		<trim prefix="WHERE" prefixOverrides="AND">
+			<if test="not detailCondition.empty">
+				<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(detailCondition.buyerLgu)">
+					AND BUYER_LGU = #{detailCondition.buyerLgu} 
+				</if>
+				<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(detailCondition.buyerAdd1)">
+					AND INSTR(BUYER_ADD1, #{detailCondition.buyerAdd1}) > 0
+				</if>
+				<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(detailCondition.buyerName)">
+					AND INSTR(BUYER_NAME, #{detailCondition.buyerName}) > 0 
+				</if>
+			</if>
+		</trim>
+	</sql>
+	<select id="selectTotalRecord" resultType="int" parameterType="kr.or.ddit.common.paging.PaginationInfo">
+		SELECT COUNT(*)
+		FROM BUYER
+		<include refid="searchFrag" />
+	</select>
+	<select id="selectBuyerList" resultType="BuyerVO" parameterType="kr.or.ddit.common.paging.PaginationInfo">
+		WITH RNUMBUYER AS (
+			SELECT ROWNUM RNUM, A.* 
+			FROM (
+				SELECT BUYER_ID, BUYER_NAME, BUYER_LGU
+					, BUYER_ADD1, BUYER_MAIL, BUYER_COMTEL
+					, BUYER_CHARGER
+				FROM BUYER
+				<include refid="searchFrag" />
+				ORDER BY BUYER_LGU, BUYER_ID DESC
+			) A
+		)
+		SELECT *
+		FROM RNUMBUYER
+		<![CDATA[
+			WHERE RNUM >= #{startRow} AND RNUM <= #{endRow}
+		]]>
+	</select>
+	<insert id="insertBuyer" parameterType="BuyerVO">
+		<selectKey order="BEFORE" resultType="string" keyProperty="buyerId">
+			SELECT #{buyerLgu} || LPAD(NVL(TO_NUMBER (SUBSTR(MAX(PROD_ID), 5)), 0) + 1, 6, '0')
+			FROM PROD
+			WHERE PROD_LGU = #{buyerLgu} 
+		</selectKey>
+			insert into prod)(
+				buyer_id,
+			    buyer_name,
+			    buyer_lgu,
+			    buyer_bank,
+			    buyer_bankno,
+			    buyer_bankname,
+			    buyer_zip,
+			    buyer_add1,
+			    buyer_add2,
+			    buyer_comtel,
+			    buyer_fax,
+			    buyer_mail,
+			    buyer_charger,
+			    buyer_telext
+   			 )
+   			 VALUES
+   			 (
+   			 	#{buyerId,jdbcType=CHAR}
+				, #{buyerName,jdbcType=VARCHAR}
+				, #{buyerLgu,jdbcType=CHAR}
+				, #{buyerBank,jdbcType=VARCHAR}
+				, #{buyerBankno,jdbcType=VARCHAR}
+				, #{buyerBankname,jdbcType=VARCHAR}
+				, #{buyerZip,jdbcType=CHAR}
+				, #{buyerAdd1,jdbcType=VARCHAR}
+				, #{buyerAdd2,jdbcType=VARCHAR}
+				, #{buyerComtel,jdbcType=VARCHAR}
+				, #{buyerFax,jdbcType=VARCHAR}
+				, #{buyerMail,jdbcType=VARCHAR}
+				, #{buyerCharger,jdbcType=VARCHAR}
+				, #{buyerTelext,jdbcType=VARCHAR}
+   			 )
+	</insert>
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
